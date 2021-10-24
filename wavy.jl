@@ -1,6 +1,7 @@
 #!/usr/bin/julia
 
 push!(LOAD_PATH, "/home/matt/Documents/julia/jsvg/")
+push!(LOAD_PATH, "/home/matt/Documents/julia/3dprinting/")
 
 using SVG
 
@@ -11,6 +12,8 @@ bw = load(ARGS[1])
 height, width = size(bw)
 hscale = 5
 wscale = 5
+
+svg = Svg(2wscale * width, 2hscale * height)
 
 plusminus = repeat([1,-1], wscale)
 
@@ -24,17 +27,16 @@ function row(yo, pxs)
 		xe += 2wscale
 	end
 
-	pts = Vector{Tuple{Float64, Float64}}(undef, length(tps))
+	line = SVG.Polyline(length(tps), style=SVG.Style(strokewidth=0.5))
 	for x in 1:length(tps)
-		pts[x] = (x, yo+tps[x])
+		line.points[x] = (x, yo+tps[x])
 	end
-	pts
+	line
 end
 
-SVG.open(stdout, 2hscale * height, 2wscale * width)
-lstyle = SVG.blackline(0.5)
 for h in 1:height
-	pts = row(2hscale*h, map(Float64, map(Gray, bw[h, :])))
-	SVG.polyline(stdout, pts, lstyle)
+	push!(svg.objects, row(2hscale*h, map(Float64, map(Gray, bw[h, :]))))
 end
-SVG.close(stdout)
+
+write(stdout, svg)
+
