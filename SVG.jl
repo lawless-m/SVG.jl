@@ -45,8 +45,9 @@ function Base.write(io::IO, p::Polyline)
 	end
 	print(io, "\" ")
 	write(io, p.style)
-	println(" />")
+	println(io, " />")
 end
 
 ###
 end
+
