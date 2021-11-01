@@ -74,7 +74,7 @@ function Base.write(io::IO, svg::Svg, p::Polyline)
 		print(io, dp(p.xs[i]), ", ", dp(svg.height-p.ys[i]), " ")
 	end
 	print(io, "\" ")
-	write(io, style)
+	write(io, p.style)
 	println(io, " />")
 end
 
