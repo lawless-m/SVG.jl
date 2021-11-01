@@ -69,16 +69,18 @@ end
 Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
 
 function Base.write(io::IO, svg::Svg, p::Polyline)
-	write(io, svg, p.xs, p.ys, style=p.style)
-end
-
-function Base.write(io::IO, svg::Svg, xs, ys; style::Style=Style())
 	print(io, "<polyline points=\"")
-	for i in 1:length(xs)
-		print(io, dp(xs[i]), ", ", dp(svg.height-ys[i]), " ")
+	for i in 1:length(p.xs)
+		print(io, dp(p.xs[i]), ", ", dp(svg.height-p.ys[i]), " ")
 	end
 	print(io, "\" ")
 	write(io, style)
+	println(io, " />")
+end
+
+function Base.write(io::IO, svg::Svg, L::Line)
+	print(io, "<line x1=\"", dp(L.x1), "\" y1=\"", dp(svg.height-L.y1), "\" x2=\"", dp(L.x2), "\" y2=\"", dp(svg.height-L.y2), "\" ")
+	write(io, L.style)
 	println(io, " />")
 end
 
