@@ -14,32 +14,34 @@ struct Style
 end
 
 struct Polyline <: SvgObject
-	points::Vector{Tuple{Float64, Float64}}
+	xs
+	ys 
 	style::Style
-	Polyline(; style::Style=Style()) = new(Vector{Tuple{Float64, Float64}}(), style)
-	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Tuple{Float64, Float64}}(undef, npoints), style)
-	Polyline(points::Vector{Tuple{Float64, Float64}}; style::Style=Style()) = new(points, style)
+	Polyline(; style::Style=Style()) = new(Vector{Float64}(), Vector{Float64}(), style)
+	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
+	Polyline(xs, ys; style::Style=Style()) = new(xs, ys, style)
 end
 
 struct Line <: SvgObject
-	pointA::Tuple{Float64, Float64}
-	pointZ::Tuple{Float64, Float64}
+	x1
+	y1
+	x2
+	y2
 	style::Style
-	Line(a, z; style::Style=Style()) = new(a, z, style)
+	Line(x1, y1, x2, y2; style::Style=Style()) = new(x1, y1, x2, y2, style)
 end
 
 struct Circle <: SvgObject
-	x::Float64
-	y::Float64
-	r::Float64
+	x
+	y
+	r
 	s::Style
 	Circle(x, y, r; style::Style=Style()) = new(x, y, r, style)
-	Circle(t::Tuple{Float64, Float64}, r::Float64; style::Style=Style()) = new(t[1], t[2], r, style)
 end
 
 struct Svg
-	width::Float64
-	height::Float64
+	width
+	height
 	objects::Vector{SvgObject}
 	Svg() = new(0, 0, Vector{SvgObject}())
 	Svg(w, h) = new(w, h, Vector{SvgObject}())
@@ -67,17 +69,21 @@ end
 Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
 
 function Base.write(io::IO, svg::Svg, p::Polyline)
+	write(io, svg, p.xs, p.ys, style=p.style)
+end
+
+function Base.write(io::IO, svg::Svg, xs, ys; style::Style=Style())
 	print(io, "<polyline points=\"")
-	for v in p.points
-		print(io, dp(v[1]), ", ", dp(svg.height-v[2]), " ")
+	for i in 1:length(xs)
+		print(io, dp(xs[i]), ", ", dp(svg.height-ys[i]), " ")
 	end
 	print(io, "\" ")
-	write(io, p.style)
+	write(io, style)
 	println(io, " />")
 end
 
 function Base.write(io::IO, svg::Svg, L::Line)
-	print(io, "<line x1=\"", dp(L.a[1]), "\" y1=\"", dp(svg.height-L.a[2]), "\" x2=\"", dp(L.z[1]), "\" y2=\"", dp(svg.height-L.z[2]), "\" ")
+	print(io, "<line x1=\"", dp(L.x1), "\" y1=\"", dp(svg.height-L.y1), "\" x2=\"", dp(L.x2), "\" y2=\"", dp(svg.height-L.y2), "\" ")
 	write(io, L.style)
 	println(io, " />")
 end
@@ -88,9 +94,7 @@ function Base.write(io::IO, svg::Svg, c::Circle)
 	println(io, " />")
 end
 
-function points2circles(points; r=1)
-	map(p->Circle(p[1], p[2], r), points)
-end
+points2circles(xs, ys; r=1) = map(i->Circle(xs[i], ys[i], r), 1:length(xs))
 
 ###
 end
