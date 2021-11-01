@@ -1,0 +1,13 @@
+name = "SVG"
+uuid = "f377ba27-75b0-41bf-bf2c-536bab790fd1"
+authors = ["Matt Lawless"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
