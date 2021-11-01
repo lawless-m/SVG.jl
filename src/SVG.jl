@@ -84,12 +84,6 @@ function Base.write(io::IO, svg::Svg, L::Line)
 	println(io, " />")
 end
 
-function Base.write(io::IO, svg::Svg, L::Line)
-	print(io, "<line x1=\"", dp(L.x1), "\" y1=\"", dp(svg.height-L.y1), "\" x2=\"", dp(L.x2), "\" y2=\"", dp(svg.height-L.y2), "\" ")
-	write(io, L.style)
-	println(io, " />")
-end
-
 function Base.write(io::IO, svg::Svg, c::Circle)
 	print(io, "<circle cx=\"", dp(c.x), "\" cy=\"", dp(svg.height-c.y), "\" r=\"", dp(c.r), "\" ")
 	write(io, c.s)
