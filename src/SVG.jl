@@ -48,18 +48,14 @@ struct Svg
 	Svg(w, h, objs) = new(w, h, objs)
 end
 
-function Base.write(fn::String, svg::Svg; inhtml=false)
-	open(fn, "w") do io write(io, svg, inhtml=inhtml) end 
-end
+Base.write(fn::String, svg::Svg; inhtml=false) = open(fn, "w") do io write(io, svg, inhtml=inhtml) end 
 
 function Base.write(io::IO, svg::Svg; inhtml=false)
 	if inhtml
 		println(io, "<html><body><div>")
 	end
 	println(io, "<svg width=\"", dp(svg.width), "\" height=\"", dp(svg.height), "\">")
-	for o in svg.objects
-		write(io, svg, o)
-	end
+	broadcast(o->write(io, svg, o), svg.objects);
 	println(io, "</svg>")
 	if inhtml
 		println(io, "</div></body></html>")
@@ -70,9 +66,7 @@ Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:"
 
 function Base.write(io::IO, svg::Svg, p::Polyline)
 	print(io, "<polyline points=\"")
-	for i in 1:length(p.xs)
-		print(io, dp(p.xs[i]), ", ", dp(svg.height-p.ys[i]), " ")
-	end
+	broadcast(i->print(io, dp(p.xs[i]), ", ", dp(svg.height-p.ys[i]), " "), 1:length(p.xs));
 	print(io, "\" ")
 	write(io, p.style)
 	println(io, " />")
