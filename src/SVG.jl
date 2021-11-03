@@ -54,7 +54,7 @@ function Base.write(io::IO, svg::Svg; inhtml=false)
 	if inhtml
 		println(io, "<html><body><div>")
 	end
-	println(io, "<svg width=\"", dp(svg.width), "\" height=\"", dp(svg.height), "\">")
+	println(io, """<svg width="$(dp(svg.width))" height="$(dp(svg.height))">""")
 	broadcast(o->write(io, svg, o), svg.objects);
 	println(io, "</svg>")
 	if inhtml
