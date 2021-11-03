@@ -1,7 +1,3 @@
-#!/usr/bin/julia
-
-push!(LOAD_PATH, "/home/matt/Documents/julia/jsvg/")
-push!(LOAD_PATH, "/home/matt/Documents/julia/3dprinting/")
 
 using SVG
 
