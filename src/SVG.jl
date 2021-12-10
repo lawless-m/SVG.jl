@@ -1,6 +1,6 @@
 module SVG
 
-export Style, Svg, Polyline, Circle, Line, write, scale, translate
+export Style, Svg, Polyline, Circle, Line, write, scale, translate, bounds
 
 dp(n; digits=2) = round(n; digits)
 
@@ -72,11 +72,15 @@ function Base.write(io::IO, svg::Svg, p::Polyline; digits=2)
 	println(io, " />")
 end
 
+bounds(p::Polyline) = (xmin=minimum(p.xs), xmax=maximum(p.xs), ymin=minimum(p.ys), ymax=maximum(p.ys))
+
 function Base.write(io::IO, svg::Svg, L::Line; digits=2)
 	print(io, "<line x1=\"", dp(L.x1; digits), "\" y1=\"", dp(svg.height-L.y1; digits), "\" x2=\"", dp(L.x2; digits), "\" y2=\"", dp(svg.height-L.y2; digits), "\" ")
 	write(io, L.style)
 	println(io, " />")
 end
+
+bounds(l::Line) = (xmin=min(l.x1,l.x2), xmax=max(l.x1,l.x2), ymin=min(l.y1,l.y2), ymax=max(l.y1,l.y2))
 
 function Base.write(io::IO, svg::Svg, c::Circle; digits=2)
 	print(io, "<circle cx=\"", dp(c.x; digits), "\" cy=\"", dp(svg.height-c.y; digits), "\" r=\"", dp(c.r; digits), "\" ")
@@ -86,9 +90,36 @@ end
 
 points2circles(xs, ys; r=1) = map(i->Circle(xs[i], ys[i], r), 1:length(xs))
 
+bounds(c::Circle) = (xmin=c.x-c.r, xmax=c.x+c.r, ymin=c.y-c.r, ymax=c.y+c.r)
+
+
+function bounds(svg::Svg)
+	xmin, xmax, ymin, ymax = Inf, -Inf, Inf, -Inf
+	for b in map(bounds, svg.objects)
+		if b.xmin < xmin
+			xmin = b.xmin
+		end
+		if b.xmax > xmax
+			xmax = b.xmax
+		end
+		if b.ymin < ymin 
+			ymin = b.ymin
+		end
+		if b.ymax > ymax
+			ymax = b.ymax
+		end
+	end
+	(;xmin, xmax, ymin, ymax)
+end
+
 ## helper
-function scale(points, ptop)
-	pmin, pmax = minimum(points), maximum(points)
+function scale(points, ptop; pmin=nothing, pmax=nothing)
+	if pmin === nothing
+		pmin = minimum(points)
+	end
+	if pmax === nothing
+		pmax = maximum(points)
+	end
 	scale = ptop / (pmax - pmin)
 	map(n -> scale * (n-pmin), points)
 end
