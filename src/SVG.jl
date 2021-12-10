@@ -94,7 +94,7 @@ function scale(points, ptop)
 end
 
 #helper
-translate(points, delta) = map(p->p+xdelta, points)
+translate(points, delta) = map(p->p+delta, points)
 
 
 ###
