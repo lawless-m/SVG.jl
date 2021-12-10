@@ -48,14 +48,14 @@ struct Svg
 	Svg(w, h, objs) = new(w, h, objs)
 end
 
-Base.write(fn::String, svg::Svg; inhtml=false) = open(fn, "w") do io write(io, svg, inhtml=inhtml) end 
+Base.write(fn::String, svg::Svg; inhtml=false, digits=2) = open(fn, "w") do io write(io, svg; inhtml, digits) end 
 
-function Base.write(io::IO, svg::Svg; inhtml=false)
+function Base.write(io::IO, svg::Svg; inhtml=false, digits=2)
 	if inhtml
 		println(io, "<html><body><div>")
 	end
 	println(io, """<svg width="$(dp(svg.width))" height="$(dp(svg.height))">""")
-	broadcast(o->write(io, svg, o), svg.objects);
+	broadcast(o->write(io, svg, o; digits), svg.objects);
 	println(io, "</svg>")
 	if inhtml
 		println(io, "</div></body></html>")
@@ -64,22 +64,22 @@ end
 
 Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
 
-function Base.write(io::IO, svg::Svg, p::Polyline)
+function Base.write(io::IO, svg::Svg, p::Polyline; digits=2)
 	print(io, "<polyline points=\"")
-	broadcast(i->print(io, dp(p.xs[i]), ", ", dp(svg.height-p.ys[i]), " "), 1:length(p.xs));
+	broadcast(i->print(io, dp(p.xs[i]; digits), ", ", dp(svg.height-p.ys[i]; digits), " "), 1:length(p.xs));
 	print(io, "\" ")
 	write(io, p.style)
 	println(io, " />")
 end
 
-function Base.write(io::IO, svg::Svg, L::Line)
-	print(io, "<line x1=\"", dp(L.x1), "\" y1=\"", dp(svg.height-L.y1), "\" x2=\"", dp(L.x2), "\" y2=\"", dp(svg.height-L.y2), "\" ")
+function Base.write(io::IO, svg::Svg, L::Line; digits=2)
+	print(io, "<line x1=\"", dp(L.x1; digits), "\" y1=\"", dp(svg.height-L.y1; digits), "\" x2=\"", dp(L.x2; digits), "\" y2=\"", dp(svg.height-L.y2; digits), "\" ")
 	write(io, L.style)
 	println(io, " />")
 end
 
-function Base.write(io::IO, svg::Svg, c::Circle)
-	print(io, "<circle cx=\"", dp(c.x), "\" cy=\"", dp(svg.height-c.y), "\" r=\"", dp(c.r), "\" ")
+function Base.write(io::IO, svg::Svg, c::Circle; digits=2)
+	print(io, "<circle cx=\"", dp(c.x; digits), "\" cy=\"", dp(svg.height-c.y; digits), "\" r=\"", dp(c.r; digits), "\" ")
 	write(io, c.s)
 	println(io, " />")
 end
