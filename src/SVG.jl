@@ -2,7 +2,7 @@ module SVG
 
 export Style, Svg, Polyline, Circle, Line, write, scale, translate
 
-dp(n; d=2) = round(n, digits=d)
+dp(n; digits=2) = round(n; digits)
 
 abstract type SvgObject end
 
