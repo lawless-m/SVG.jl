@@ -65,9 +65,11 @@ function bounds(svg::Svg)
 	(;xmin, xmax, ymin, ymax)
 end
 
-Base.write(fn::String, svg::Svg, width, height;  viewbox="", inhtml=false, digits=2) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits) end
+Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits) end
 
-function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, digits=2)
+write_objs(io::IO, svg::Svg) = foreach(o->write(io, o), svg.objects)
+
+function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs)
 	if inhtml
 		println(io, "<html><body><div>")
 	end
@@ -77,7 +79,7 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, d
 		viewbox = " viewBox=\"$viewbox\""
 	end
 	println(io, """<svg width="$width" height="$height"$viewbox>""")
-	foreach(o->write(io, svg, o), svg.objects)
+	objwrite_fn(io, svg)
 	println(io, "</svg>")
 	if inhtml
 		println(io, "</div></body></html>")
@@ -86,7 +88,7 @@ end
 
 Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
 
-function Base.write(io::IO, svg::Svg, p::Polyline)
+function Base.write(io::IO, p::Polyline)
 	print(io, "<polyline points=\"")
 	foreach(i->print(io, p.xs[i], ",", p.ys[i], " "), 1:length(p.xs))
 	print(io, "\" ")
@@ -96,7 +98,7 @@ end
 
 bounds(p::Polyline) = (xmin=minimum(p.xs), xmax=maximum(p.xs), ymin=minimum(p.ys), ymax=maximum(p.ys))
 
-function Base.write(io::IO, svg::Svg, L::Line)
+function Base.write(io::IO, L::Line)
 	print(io, "<line x1=\"", L.x1, "\" y1=\"", L.y1, "\" x2=\"", L.x2, "\" y2=\"", L.y2, "\" ")
 	write(io, L.style)
 	println(io, " />")
@@ -104,7 +106,7 @@ end
 
 bounds(l::Line) = (xmin=min(l.x1,l.x2), xmax=max(l.x1,l.x2), ymin=min(l.y1,l.y2), ymax=max(l.y1,l.y2))
 
-function Base.write(io::IO, svg::Svg, c::Circle)
+function Base.write(io::IO, c::Circle)
 	print(io, "<circle cx=\"", c.x, "\" cy=\"", c.y, "\" r=\"", c.r, "\" ")
 	write(io, c.s)
 	println(io, " />")
