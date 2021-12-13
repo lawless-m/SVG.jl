@@ -65,7 +65,7 @@ function bounds(svg::Svg)
 	(;xmin, xmax, ymin, ymax)
 end
 
-Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits) end
+Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits, objwrite_fn) end
 
 write_objs(io::IO, svg::Svg) = foreach(o->write(io, o), svg.objects)
 
