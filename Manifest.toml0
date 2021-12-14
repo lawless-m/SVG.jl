@@ -1,9 +1,0 @@
-# This file is machine-generated - editing it directly is not advised prove it !
-
-julia_version = "1.7.0"
-manifest_format = "2.0"
-
-[deps]
- 
-
-
