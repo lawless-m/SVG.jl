@@ -21,8 +21,8 @@ struct Polyline <: SvgObject
 	style::Style
 	Polyline(; style::Style=Style()) = new(Vector{Float64}(), Vector{Float64}(), style)
 	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
-	Polyline(xs, ys; style::Style=Style()) = new(xs, ys, style)
-	Polyline(xys; style::Style=Style()) = new(map(xy->xy[1], xys), map(xy->xy[2], xys), style)
+	Polyline(xs, ys; fx=identity, fy=identity, style::Style=Style()) = new(map(fx, xs), map(fy, ys), style)
+	Polyline(xys; fx=identity, fy=identity, style::Style=Style()) = new(map(xy->fx(xy[1]), xys), map(xy->fy(xy[2]), xys), style)
 end
 
 ==(p1::Polyline, p2::Polyline) = p1.xs == p2.xs && p1.ys == p2.ys && p1.style == p2.style
