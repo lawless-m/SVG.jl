@@ -2,6 +2,8 @@ module SVG
 
 export Style, Svg, Polyline, Circle, Line, write, translate, bounds
 
+import Base.==
+
 dp(n; digits=2) = round(n; digits)
 
 abstract type SvgObject end
@@ -21,8 +23,9 @@ struct Polyline <: SvgObject
 	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
 	Polyline(xs, ys; style::Style=Style()) = new(xs, ys, style)
 	Polyline(xys; style::Style=Style()) = new(map(xy->xy[1], xys), map(xy->xy[2], xys), style)
-	end
 end
+
+==(p1::Polyline, p2::Polyline) = p1.xs == p2.xs && p1.ys == p2.ys && p1.style == p2.style
 
 struct Line <: SvgObject
 	x1

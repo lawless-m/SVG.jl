@@ -14,8 +14,10 @@ end
    @test bounds(Circle(0,1,1)) == (xmin=-1, xmax=1, ymin=0, ymax=2)
    @test bounds(Line(0,1,1,2)) == (xmin=0, xmax=1, ymin=1, ymax=2)
    @test bounds(Polyline([0,1,2], [3,4,5])) == (xmin=0, xmax=2, ymin=3, ymax=5)
+   @test bounds(Polyline([(0,3), (1,4), (2,5)]) == (xmin=0, xmax=2, ymin=3, ymax=5)
    @test bounds(Svg([Circle(0,1,1), Line(0,1,1,2), Polyline([0,1,2], [3,4,5])])) == (xmin=-1, xmax=2, ymin=0, ymax=5)
 ==#
+   @test Polyline([0,1,2], [3,4,5]) == Polyline([(0,3), (1,4), (2,5)])
    @test wtest()
    
 end
