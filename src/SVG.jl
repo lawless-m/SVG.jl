@@ -20,6 +20,8 @@ struct Polyline <: SvgObject
 	Polyline(; style::Style=Style()) = new(Vector{Float64}(), Vector{Float64}(), style)
 	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
 	Polyline(xs, ys; style::Style=Style()) = new(xs, ys, style)
+	Polyline(xys; style::Style=Style()) = new(map(xy->xy[1], xys), map(xy->xy[2], xys), style)
+	end
 end
 
 struct Line <: SvgObject
