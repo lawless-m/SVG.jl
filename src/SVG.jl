@@ -138,8 +138,8 @@ end
 
 """
 	bounds(svg::Svg)	
-	bounds(svg::Svgobject)
-Return the bounding box of the entire `Svg`` or an individual `SvgObject`
+	bounds(svg::SvgObject)
+Return the bounding box of the entire `Svg` or an individual `SvgObject`
 # Returns
 NamedTuple(xmin, ymin, xmax, ymax)
 """
@@ -164,11 +164,11 @@ end
 
 """
 	bounds_viewbox(svg::Svg)
-	bounds_viewbox(bnds::NamedTuple)
+	bounds_viewbox(bounds::NamedTuple)
 Create a viewbox string using either the Svg or a set of bounds
 """
 bounds_viewbox(svg::Svg) = bounds_viewbox(bounds(svg))
-bounds_viewbox(bnds::NamedTuple) = "$(bnds.xmin) $(bnds.ymin) $(bnds.xmax) $(bnds.ymax)"
+bounds_viewbox(bounds::NamedTuple) = "$(bounds.xmin) $(bounds.ymin) $(bounds.xmax) $(bounds.ymax)"
 
 """
 	write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs)
@@ -192,9 +192,7 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, d
 	if inhtml
 		println(io, "<html><body><div>")
 	end
-	if viewbox == ""
-		viewbox = ""
-	else
+	if viewbox != ""
 		viewbox = " viewBox=\"$viewbox\""
 	end
 	println(io, """<svg width="$width" height="$height"$viewbox>""")
