@@ -12,10 +12,12 @@ end
 @testset "SVG.jl" begin
 
    @test bounds(Circle(0,1,1)) == (xmin=-1, ymin=0, xmax=1, ymax=2)
+   @test bounds(scaled(Circle(0,1,1), identity, y->10y)) == (xmin=-1, ymin=9, xmax=1, ymax=11)
    @test bounds(Line(0,1,1,2)) == (xmin=0, ymin=1, xmax=1, ymax=2)
    @test bounds(Polyline([0,1,2], [3,4,5])) == (xmin=0, ymin=3, xmax=2, ymax=5)
    @test bounds(Polyline([(0,3), (1,4), (2,5)])) == (xmin=0, ymin=3, xmax=2, ymax=5)
    @test bounds(Svg([Circle(0,1,1), Line(0,1,1,2), Polyline([0,1,2], [3,4,5])])) == (xmin=-1, ymin=0, xmax=2, ymax=5)
+   @test bounds(scaled(Svg([Circle(0,1,1), Line(0,1,1,2), Polyline([0,1,2], [3,4,5])]), 99,200)) == (xmin=32, ymin=32, xmax=99, ymax=165)
 
    @test Polyline([0,1,2], [3,4,5]) == Polyline([(0,3), (1,4), (2,5)])
    @test Polyline([0,1,2], [3,4,5], identity, identity) == Polyline([(0,3), (1,4), (2,5)], identity)
