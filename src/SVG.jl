@@ -1,6 +1,6 @@
 module SVG
 
-export Style, Svg, Polyline, Circle, Line, write, translate, bounds
+export Style, Svg, Polyline, Circle, Line, write, translate, bounds, bounds_viewbox
 
 import Base.==
 
@@ -72,6 +72,8 @@ function bounds(svg::Svg)
 	xmin, ymin = max(0,xmin), max(0,ymin)
 	(;xmin, xmax, ymin, ymax)
 end
+
+bounds_viewbox(svg::Svg) = begin bs = bounds(svg); "$(bs.xmin) $(bs.ymin) $(bs.xmax) $(bs.ymax)" end
 
 Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits, objwrite_fn) end
 
