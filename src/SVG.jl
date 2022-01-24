@@ -1,6 +1,6 @@
 module SVG
 
-export Style, Svg, Polyline, Circle, Line, write, translate, bounds, bounds_viewbox
+export Style, Svg, Polyline, Circle, Line, write, translate, bounds, bounds_viewbox, Bounds
 
 import Base.==
 
@@ -54,29 +54,26 @@ struct Svg
 end
 
 function bounds(svg::Svg)
-	xmin, xmax, ymin, ymax = Inf, -Inf, Inf, -Inf
+	xmin, ymin, xmax, ymax = Inf, Inf, -Inf, -Inf
 	for b in map(bounds, svg.objects)
 		if b.xmin < xmin
 			xmin = b.xmin
 		end
-		if b.xmax > xmax
-			xmax = b.xmax
-		end
 		if b.ymin < ymin 
 			ymin = b.ymin
+		end
+		if b.xmax > xmax
+			xmax = b.xmax
 		end
 		if b.ymax > ymax
 			ymax = b.ymax
 		end
 	end
-	xmin, ymin = max(0,xmin), max(0,ymin)
-	(;xmin, xmax, ymin, ymax)
+	(;xmin, ymin, xmax, ymax)
 end
 
-const BoundsType = NamedTuple{(:xmin, :xmax, :ymin, :ymax), NTuple{4, T}} where T <: Number
-
 bounds_viewbox(svg::Svg) = bounds_viewbox(bounds(svg))
-bounds_viewbox(bnds::BoundsType) = "$(bnds.xmin) $(bnds.ymin) $(bnds.xmax) $(bnds.ymax)"
+bounds_viewbox(bnds::NamedTuple) = "$(bnds.xmin) $(bnds.ymin) $(bnds.xmax) $(bnds.ymax)"
 
 Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits, objwrite_fn) end
 
@@ -109,7 +106,7 @@ function Base.write(io::IO, p::Polyline)
 	println(io, " />")
 end
 
-bounds(p::Polyline) = (xmin=minimum(p.xs), xmax=maximum(p.xs), ymin=minimum(p.ys), ymax=maximum(p.ys))
+bounds(p::Polyline) = (xmin=minimum(p.xs), ymin=minimum(p.ys), xmax=maximum(p.xs), ymax=maximum(p.ys))
 
 function Base.write(io::IO, L::Line)
 	print(io, "<line x1=\"", L.x1, "\" y1=\"", L.y1, "\" x2=\"", L.x2, "\" y2=\"", L.y2, "\" ")
@@ -117,7 +114,7 @@ function Base.write(io::IO, L::Line)
 	println(io, " />")
 end
 
-bounds(l::Line) = (xmin=min(l.x1,l.x2), xmax=max(l.x1,l.x2), ymin=min(l.y1,l.y2), ymax=max(l.y1,l.y2))
+bounds(l::Line) = (xmin=min(l.x1,l.x2), ymin=min(l.y1,l.y2), xmax=max(l.x1,l.x2), ymax=max(l.y1,l.y2))
 
 function Base.write(io::IO, c::Circle)
 	print(io, "<circle cx=\"", c.x, "\" cy=\"", c.y, "\" r=\"", c.r, "\" ")
@@ -127,7 +124,7 @@ end
 
 points2circles(xs, ys; r=1) = map(i->Circle(xs[i], ys[i], r), 1:length(xs))
 
-bounds(c::Circle) = (xmin=c.x-c.r, xmax=c.x+c.r, ymin=c.y-c.r, ymax=c.y+c.r)
+bounds(c::Circle) = (xmin=c.x-c.r, ymin=c.y-c.r, xmax=c.x+c.r, ymax=c.y+c.r)
 
 #helper
 translate(points::Vector, delta) = map(p->p+delta, points)
