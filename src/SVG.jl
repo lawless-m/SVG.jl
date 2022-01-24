@@ -126,13 +126,13 @@ Scale either the whole Svg or individual Objects
 - `w`, `h` - scale the entire Svg up to the smallest of `w` / `h` and maintain aspect ratio
 """
 scaled(s::Svg, fx::Function, fy::Function) = Svg(map(o->scaled(o, fx, fy), s.objects))
-function scaled(svg, width::Real, height::Real)
+function scaled(svg, width::Real, height::Real; flip_y=false)
     xmin, ymin, xmax, ymax = bounds(svg)
     xmx = xmax - xmin
     ymx = ymax - ymin
     scale = min(width, height) / min(xmx, ymx)
     fx = x -> scale * (x - xmin)
-    fy = y -> scale * (y - ymin) 
+    fy = y -> flip_y ? scale * (y - ymin) : ymx - scale * (y - ymin)
 	scaled(svg, fx, fy)
 end
 
