@@ -12,6 +12,6 @@ makedocs(
 
 deploydocs(
     repo = "github.com/lawless-m/SVG.jl.git", 
-    devbranch = "main",
+    devbranch = "master",
     push_preview = true,
 )
