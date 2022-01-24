@@ -73,7 +73,8 @@ function bounds(svg::Svg)
 	(;xmin, xmax, ymin, ymax)
 end
 
-bounds_viewbox(svg::Svg) = begin bs = bounds(svg); "$(bs.xmin) $(bs.ymin) $(bs.xmax) $(bs.ymax)" end
+bounds_viewbox(svg::Svg) = bounds_viewbox(bounds(svg))
+bounds_viewbox(bnds::typeof{(xmin=0.0, xmax=0.0, ymin=0.0, ymax=0.0)}) "$(bnds.xmin) $(bnds.ymin) $(bnds.xmax) $(bnds.ymax)"
 
 Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits, objwrite_fn) end
 
