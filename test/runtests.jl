@@ -18,6 +18,7 @@ end
    @test bounds(Svg([Circle(0,1,1), Line(0,1,1,2), Polyline([0,1,2], [3,4,5])])) == (xmin=-1, xmax=2, ymin=0, ymax=5)
 ==#
    @test Polyline([0,1,2], [3,4,5]) == Polyline([(0,3), (1,4), (2,5)])
+   @test Polyline([0,1,2], [3,4,5], identity, identity) == Polyline([(0,3), (1,4), (2,5)], identity)
    @test wtest()
    
 end
