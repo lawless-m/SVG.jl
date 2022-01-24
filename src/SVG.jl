@@ -132,7 +132,7 @@ function scaled(svg, width::Real, height::Real; flip_y=false)
     ymx = ymax - ymin
     scale = min(width, height) / min(xmx, ymx)
     fx = x -> scale * (x - xmin)
-    fy = y -> flip_y ? scale * (y - ymin) : ymx - scale * (y - ymin)
+    fy = y -> flip_y ? height - scale * (y - ymin) : scale * (y - ymin) 
 	scaled(svg, fx, fy)
 end
 
