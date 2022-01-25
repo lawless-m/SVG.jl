@@ -135,22 +135,24 @@ struct Svg
 	Svg(objs) = new(objs)
 end
 """
-	scaled(s::Svg, w, h)
+	scaled(s::Svg, w, h; digits, flip_y)
 	scaled(s::Svg, fx, fy)
 	scaled(s::SvgObject, fx, fy)
 Scale either the whole Svg or individual Objects
 - `s` either the whole Svg or individual objects
 - `fx`, `fy` - functions to scale the positional co-ordinates
 - `w`, `h` - scale the entire Svg up to the smallest of `w` / `h` and maintain aspect ratio
+- `digits::Int` - round to this many digits
+- `flip_y::Bool` - flip vertically
 """
 scaled(s::Svg, fx::Function, fy::Function) = Svg(map(o->scaled(o, fx, fy), s.objects))
-function scaled(svg, width::Real, height::Real; flip_y=false)
+function scaled(svg, width::Real, height::Real; flip_y=false, digits=2)
     xmin, ymin, xmax, ymax = bounds(svg)
     xmx = xmax - xmin
     ymx = ymax - ymin
     scale = min(width, height) / min(xmx, ymx)
-    fx = x -> scale * (x - xmin)
-    fy = y -> flip_y ? height - scale * (y - ymin) : scale * (y - ymin) 
+    fx = x -> round(scale * (x - xmin); digits)
+    fy = y -> round(flip_y ? height - scale * (y - ymin) : scale * (y - ymin); digits)
 	scaled(svg, fx, fy)
 end
 
@@ -226,7 +228,6 @@ end
 close_svg(io) = println(io, "</svg>")
 open_html(io; inhtml) = if inhtml println(io, "<html><body><div>") end
 close_html(io; inhtml) = if inhtml println(io, "</div></body></html>") end
-
 
 function Base.write(io::IO, s::Inline)
 	print(io, "style=\"")
