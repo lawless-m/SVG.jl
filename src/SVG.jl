@@ -207,9 +207,14 @@ Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, styles
 write_objs(io::IO, svg::Svg) = foreach(o->write(io, o), svg.objects)
 
 function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, stylesheet="", digits=2, objwrite_fn=write_objs)
-	if inhtml
-		println(io, "<html><body><div>")
-	end
+	open_html(io; inhtml)
+	open_svg(io, width, height; viewbox, stylesheet)
+	objwrite_fn(io, svg)
+	close_svg(io)
+	close_html(io; inhtml)
+end
+
+function open_svg(io, width, height; viewbox="", stylesheet="")
 	if viewbox != ""
 		viewbox = " viewBox=\"$viewbox\""
 	end
@@ -217,12 +222,11 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, s
 	if stylesheet != ""
 		println(io, "<style>\n@import url($(stylesheet).css)\n</style>")
 	end
-	objwrite_fn(io, svg)
-	println(io, "</svg>")
-	if inhtml
-		println(io, "</div></body></html>")
-	end
 end
+close_svg(io) = println(io, "</svg>")
+open_html(io; inhtml) = if inhtml println(io, "<html><body><div>") end
+close_html(io; inhtml) = if inhtml println(io, "</div></body></html>") end
+
 
 function Base.write(io::IO, s::Inline)
 	print(io, "style=\"")
