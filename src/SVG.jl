@@ -1,6 +1,6 @@
 module SVG
 
-export Style, Svg, Polyline, Circle, Line, write, bounds, bounds_viewbox, scaled, points2circles
+export Inline, Class, Svg, Polyline, Circle, Line, write, bounds, bounds_viewbox, scaled, points2circles
 
 import Base.==
 
@@ -8,21 +8,34 @@ dp(n; digits=2) = round(n; digits)
 
 abstract type SvgObject end
 
+abstract type Style end
+
 """
-	Style
+	Inline
+Inline style object
 # Properties
 - `fill` SVG fill string
 - `strokecolor` SVG stroke color string
 - `strokewidth` SVG stoke width string
 # Constructor
-	Style(;fill="none", strokecolor="black", strokewidth=1)
+	Inline(;fill="none", strokecolor="black", strokewidth=1)
 All keyword arguments
 """
-struct Style
+struct Inline <: Style
 	fill::String
 	strokecolor::String
 	strokewidth::Float64
-	Style(;fill="none", strokecolor="black", strokewidth=1) = new(fill, strokecolor, strokewidth)
+	Inline(;fill="none", strokecolor="black", strokewidth=1) = new(fill, strokecolor, strokewidth)
+end
+
+"""
+	Class
+CSS class name Object
+# Constructor
+	Class(class::String)
+"""
+struct Class <: Style
+	class::String
 end
 
 """
@@ -38,26 +51,26 @@ Quite the choice.
 - Or empty or with pre-allocated vectors of `xs`/`ys`
 - Supply `Style` using kwarg
 ```
-Polyline(; style::Style=Style())
-Polyline(npoints::Int; style::Style=Style())
-Polyline(xs::Vector, ys::Vector; style::Style=Style()) 
-Polyline(xs::Vector, ys::Vector, fx::Function, fy::Function; style::Style=Style()) 
-Polyline(xys::Vector; style::Style=Style()) 
-Polyline(xys::Vector, fxy::Function; style::Style=Style()) 
-Polyline(xys::Vector, fx::Function, fy::Function; style::Style=Style())
+Polyline(; style::Style=Inline())
+Polyline(npoints::Int; style::Style=Inline())
+Polyline(xs::Vector, ys::Vector; style::Style=Inline()) 
+Polyline(xs::Vector, ys::Vector, fx::Function, fy::Function; style::Style=Inline()) 
+Polyline(xys::Vector; style::Style=Inline()) 
+Polyline(xys::Vector, fxy::Function; style::Style=Inline()) 
+Polyline(xys::Vector, fx::Function, fy::Function; style::Style=Inline())
 ```
 """
 struct Polyline <: SvgObject
 	xs
 	ys 
 	style::Style
-	Polyline(; style::Style=Style()) = new(Vector{Float64}(), Vector{Float64}(), style)
-	Polyline(npoints::Int; style::Style=Style()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
-	Polyline(xs::Vector, ys::Vector; style::Style=Style()) = new(xs, ys, style)
-	Polyline(xs::Vector, ys::Vector, fx::Function, fy::Function; style::Style=Style()) = Polyline(map(fx, xs), map(fy, ys); style)
-	Polyline(xys::Vector; style::Style=Style()) = Polyline(map(xy->xy[1], xys), map(xy->xy[2], xys); style)
-	Polyline(xys::Vector, fxy::Function; style::Style=Style()) = Polyline(map(xy->fxy(xy), xys); style)
-	Polyline(xys::Vector, fx::Function, fy::Function; style::Style=Style()) = Polyline(map(xy->fx(xy[1]), xys), map(xy->fy(xy[2]), xys); style)
+	Polyline(; style::Style=Inline()) = new(Vector{Float64}(), Vector{Float64}(), style)
+	Polyline(npoints::Int; style::Style=Inline()) = new(Vector{Float64}(undef, npoints), Vector{Float64}(undef, npoints), style)
+	Polyline(xs::Vector, ys::Vector; style::Style=Inline()) = new(xs, ys, style)
+	Polyline(xs::Vector, ys::Vector, fx::Function, fy::Function; style::Style=Inline()) = Polyline(map(fx, xs), map(fy, ys); style)
+	Polyline(xys::Vector; style::Style=Inline()) = Polyline(map(xy->xy[1], xys), map(xy->xy[2], xys); style)
+	Polyline(xys::Vector, fxy::Function; style::Style=Inline()) = Polyline(map(xy->fxy(xy), xys); style)
+	Polyline(xys::Vector, fx::Function, fy::Function; style::Style=Inline()) = Polyline(map(xy->fx(xy[1]), xys), map(xy->fy(xy[2]), xys); style)
 end
 
 ==(p1::Polyline, p2::Polyline) = p1.xs == p2.xs && p1.ys == p2.ys && p1.style == p2.style
@@ -70,7 +83,7 @@ scaled(p::Polyline, fx, fy) = Polyline(p.xs, p.ys, fx, fy; style=p.style)
 - `x1`, `y1` `x2`, `y2` - Endpoints of the line
 - `style` - Style object for this line
 # Constructor
-	Line(x1, y1, x2, y2; style::Style=Style())
+	Line(x1, y1, x2, y2; style::Style=Inline())
 """
 struct Line <: SvgObject
 	x1
@@ -78,7 +91,7 @@ struct Line <: SvgObject
 	x2
 	y2
 	style::Style
-	Line(x1, y1, x2, y2; style::Style=Style()) = new(x1, y1, x2, y2, style)
+	Line(x1, y1, x2, y2; style::Style=Inline()) = new(x1, y1, x2, y2, style)
 end
 
 scaled(l::Line, fx, fy) = Line(fx(l.x1), fy(l.y1), fx(l.x2), fy(l.y2); style=l.style)
@@ -96,7 +109,7 @@ struct Circle <: SvgObject
 	y
 	r
 	style::Style
-	Circle(x, y, r; style::Style=Style()) = new(x, y, r, style)
+	Circle(x, y, r; style::Style=Inline()) = new(x, y, r, style)
 end
 
 scaled(c::Circle, fx, fy) = Circle(fx(c.x), fy(c.y), c.r; style=c.style)
@@ -203,7 +216,8 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, d
 	end
 end
 
-Base.write(io::IO, s::Style) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
+Base.write(io::IO, s::Inline) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
+Base.write(io::IO, s::Class) = print(io, "class=\"$(s.class)\"")
 
 function Base.write(io::IO, p::Polyline)
 	print(io, "<polyline points=\"")
