@@ -197,11 +197,11 @@ write the Svg to a file or IO object.
 - `digits` - round all SVG Object co-ordinates to this many digits
 - `objwrite_fn` - a callback so the caller can modify the objects as they are written
 """
-Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, digits, objwrite_fn) end
+Base.write(fn::String, svg::Svg, width, height; viewbox="", inhtml=false, stylesheet="", digits=2, objwrite_fn=write_objs) = open(fn, "w+") do io write(io, svg, width, height; viewbox, inhtml, stylesheet, digits, objwrite_fn) end
 
 write_objs(io::IO, svg::Svg) = foreach(o->write(io, o), svg.objects)
 
-function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, digits=2, objwrite_fn=write_objs)
+function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, stylesheet="", digits=2, objwrite_fn=write_objs)
 	if inhtml
 		println(io, "<html><body><div>")
 	end
@@ -209,6 +209,9 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, d
 		viewbox = " viewBox=\"$viewbox\""
 	end
 	println(io, """<svg width="$width" height="$height"$viewbox>""")
+	if stylesheet != ""
+		println(io, "<style>\n@import url($(stylesheet).css)\n</style>")
+	end
 	objwrite_fn(io, svg)
 	println(io, "</svg>")
 	if inhtml
