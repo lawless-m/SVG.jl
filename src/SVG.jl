@@ -14,18 +14,23 @@ abstract type Style end
 	Inline
 Inline style object
 # Properties
-- `fill` SVG fill string
-- `strokecolor` SVG stroke color string
-- `strokewidth` SVG stoke width string
+- `attribs` Dict of CSS attributes
 # Constructor
-	Inline(;fill="none", strokecolor="black", strokewidth=1)
+	Inline(;fill="none", stroke="black", stroke_width=1)
 All keyword arguments
 """
 struct Inline <: Style
-	fill::String
-	strokecolor::String
-	strokewidth::Float64
-	Inline(;fill="none", strokecolor="black", strokewidth=1) = new(fill, strokecolor, strokewidth)
+	attribs 
+	function Inline(pairs=[];fill="none", stroke="black", stroke_width=1)
+		attribs = Dict()
+		attribs["fill"] = fill
+		attribs["stroke"] = stroke
+		attribs["stroke-width"] = stroke_width
+		for (k,v) in pairs
+			attribs[k] = v
+		end
+		new(attribs)
+	end
 end
 
 """
@@ -73,7 +78,7 @@ struct Polyline <: SvgObject
 	Polyline(xys::Vector, fx::Function, fy::Function; style::Style=Inline()) = Polyline(map(xy->fx(xy[1]), xys), map(xy->fy(xy[2]), xys); style)
 end
 
-==(p1::Polyline, p2::Polyline) = p1.xs == p2.xs && p1.ys == p2.ys && p1.style == p2.style
+==(p1::Polyline, p2::Polyline) = p1.xs == p2.xs && p1.ys == p2.ys && p1.style.attribs == p2.style.attribs
 
 scaled(p::Polyline, fx, fy) = Polyline(p.xs, p.ys, fx, fy; style=p.style)
 
@@ -208,7 +213,7 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, s
 	if viewbox != ""
 		viewbox = " viewBox=\"$viewbox\""
 	end
-	println(io, """<svg width="$width" height="$height"$viewbox>""")
+	println(io, """<svg width="$width" height="$height"$viewbox xmlns="http://www.w3.org/2000/svg">""")
 	if stylesheet != ""
 		println(io, "<style>\n@import url($(stylesheet).css)\n</style>")
 	end
@@ -219,7 +224,13 @@ function Base.write(io::IO, svg::Svg, width, height; viewbox="", inhtml=false, s
 	end
 end
 
-Base.write(io::IO, s::Inline) = print(io, "style=\"", "fill:", s.fill, ";stroke:", s.strokecolor, ";stroke-width:", dp(s.strokewidth), "\"")
+function Base.write(io::IO, s::Inline)
+	print(io, "style=\"")
+	for (k,v) in s.attribs
+		print(io, "$k:$v; ")
+	end
+	print(io, "\"")
+end
 Base.write(io::IO, s::Class) = print(io, "class=\"$(s.class)\"")
 
 function Base.write(io::IO, p::Polyline)
