@@ -1,5 +1,10 @@
 a few tools for creating SVG files in Julia
 
+# Don't use this package, use Luxor
+
+http://juliagraphics.github.io/Luxor.jl/stable/
+
+
 and some code exampled I used it in
 
 
